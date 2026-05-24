@@ -365,13 +365,11 @@
         const loadingDiv = document.getElementById('loading');
         const locationSelect = document.getElementById('location');
 
-        // Load locations on page load
         document.addEventListener('DOMContentLoaded', async () => {
             try {
                 const response = await fetch('http://localhost:5000/api/locations');
                 const data = await response.json();
                 
-                // Populate location dropdown
                 data.locations.forEach(location => {
                     const option = document.createElement('option');
                     option.value = location;
@@ -379,7 +377,6 @@
                     locationSelect.appendChild(option);
                 });
                 
-                // Set default location
                 if (data.locations.length > 0) {
                     locationSelect.value = data.locations[0];
                 }
@@ -388,16 +385,13 @@
             }
         });
 
-        // Form submission
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            // Validate form
             if (!validateForm()) {
                 return;
             }
 
-            // Get form data
             const formData = {
                 location: document.getElementById('location').value,
                 total_sqft: document.getElementById('total_sqft').value,
@@ -406,7 +400,6 @@
                 balcony: document.getElementById('balcony').checked ? 1 : 0
             };
 
-            // Show loading
             loadingDiv.style.display = 'block';
             resultDiv.style.display = 'none';
 
@@ -475,23 +468,23 @@
             
             const summary = `
                 <div class="input-summary-item">
-                    <span>📍 Location:</span>
+                    <span> Location:</span>
                     <strong>${input.location}</strong>
                 </div>
                 <div class="input-summary-item">
-                    <span>🛏️ BHK:</span>
+                    <span> BHK:</span>
                     <strong>${input.bhk}</strong>
                 </div>
                 <div class="input-summary-item">
-                    <span>📐 Area:</span>
+                    <span> Area:</span>
                     <strong>${input.total_sqft.toLocaleString()} Sqft</strong>
                 </div>
                 <div class="input-summary-item">
-                    <span>🚿 Bathrooms:</span>
+                    <span> Bathrooms:</span>
                     <strong>${input.bath}</strong>
                 </div>
                 <div class="input-summary-item">
-                    <span>🌳 Balcony:</span>
+                    <span> Balcony:</span>
                     <strong>${input.balcony ? 'Yes' : 'No'}</strong>
                 </div>
             `;
@@ -513,7 +506,7 @@
             resultDiv.style.display = 'block';
         }
 
-        // Clear error on input
+
         ['location', 'bhk', 'total_sqft', 'bath'].forEach(field => {
             document.getElementById(field).addEventListener('change', () => {
                 document.getElementById(field).closest('.form-group').classList.remove('error');

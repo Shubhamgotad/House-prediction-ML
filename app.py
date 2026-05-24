@@ -8,7 +8,6 @@ import os
 app = Flask(__name__)
 CORS(app)
 
-# Load the trained model and preprocessing objects
 MODEL_PATH = 'house_model.pkl'
 
 try:
@@ -30,7 +29,6 @@ def predict_house_price(location, total_sqft, bhk, bath, balcony=0):
         return {"error": "Model not loaded"}
     
     try:
-        # Create input dataframe
         input_df = pd.DataFrame({
             'location': [location],
             'total_sqft': [float(total_sqft)],
@@ -39,29 +37,22 @@ def predict_house_price(location, total_sqft, bhk, bath, balcony=0):
             'has_balcony': [1 if int(balcony) > 0 else 0]
         })
         
-        # Create engineered features
         input_df['sqft_per_bhk'] = input_df['total_sqft'] / input_df['bhk']
         input_df['bath_per_bhk'] = input_df['bath'] / input_df['bhk']
 
-        # Replace unknown locations with 'other'
         input_df['location'] = input_df['location'].apply(
             lambda x: x if x in top_locations else 'other'
         )
         
-        # Apply one-hot encoding to location
         location_encoded = ohe.transform(input_df[['location']])
         
-        # Apply polynomial features to numeric columns
         num_features = ['total_sqft', 'bhk', 'bath', 'has_balcony', 'sqft_per_bhk', 'bath_per_bhk']
         input_num = poly.transform(input_df[num_features])
         
-        # Scale numeric features
         input_scaled = scaler.transform(input_num)
         
-        # Combine with location encoding
         input_scaled = np.hstack([input_scaled, location_encoded])
         
-        # Make prediction
         price = model.predict(input_scaled)[0]
         return float(price)
     except Exception as e:
@@ -78,7 +69,6 @@ def predict():
     try:
         data = request.json
         
-        # Validate input
         required_fields = ['location', 'total_sqft', 'bhk', 'bath']
         for field in required_fields:
             if field not in data:
@@ -90,7 +80,6 @@ def predict():
         bath = int(data['bath'])
         balcony = int(data.get('balcony', 0))
         
-        # Validate ranges
         if total_sqft < 300 or total_sqft > 30000:
             return jsonify({"error": "Total sqft should be between 300 and 30000"}), 400
         if bhk < 1 or bhk > 20:
@@ -98,7 +87,6 @@ def predict():
         if bath < 1 or bath > 15:
             return jsonify({"error": "Bathrooms should be between 1 and 15"}), 400
         
-        # Get prediction
         price = predict_house_price(location, total_sqft, bhk, bath, balcony)
         
         if isinstance(price, dict) and "error" in price:
